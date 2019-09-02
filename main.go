@@ -7,6 +7,7 @@ import (
   "fmt"
   "strings"
   "os/user"
+  "os/exec"
 )
 
 func utf8_length(str string) int {
@@ -70,11 +71,12 @@ func get_host() string {
 }
 
 func git_branch() string {
-  cwd, err := os.Getwd()
-  if err != nil {
-    panic(err)
+  out_bytes, _ := exec.Command("git", "branch").Output()
+  out := string(out_bytes)
+  if (len(out) == 0) {
+    return "no branch"
   }
-  git.Branch
+  return strings.Split(out, "\n")[0]
 }
 
 func main() {
