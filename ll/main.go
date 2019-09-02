@@ -16,19 +16,22 @@ func main() {
     "96f",
     "f72",
     "7c0",
-    "8f2",
     "000",
   }
-  args := []string {"-lah"}
+  args := []string {"-lah", "--color"}
   if (len(os.Args) > 1) {
     args = append(args, os.Args[1:]...)
   }
-  out_bytes, _ := exec.Command("ls", args...).Output()
+  out_bytes, err := exec.Command("ls", args...).Output()
+  if (err != nil) {
+    panic(err)
+  }
   out := string(out_bytes)
   lines := strings.Split(out, "\n")[1:]
   for i := 0; i < len(lines) - 1; i++ {
-    var sections []Section
+    // cols: ["rwrwrwr", "", "", "", "2", "macmv", "macmv", "4.0K", "Sep", "1", "2019", "file.txt"]
     cols := strings.Split(lines[i], " ")
+    // string_sections: ["rwrwrwr", "   2", "macmv", "macmv", "4.0K", "Sep", "1", "2019", "file.txt"]
     string_sections := []string {"", "", "", "", "", "", "", "", ""}
     for j := 0; j < len(cols); j++ {
       if j < 8 {
@@ -44,16 +47,20 @@ func main() {
         break
       }
     }
+    // sections: the Section objects used to generate the output
+    var sections []Section
+    // color_index: index of the colors array defined above
     color_index := 0
     for j := 0; j < 9; j++ {
-      if (j == 5) {
-        sections = append(sections, Section {Text: string_sections[j] + " " + string_sections[j + 1], Fg: "fff", Bg: colors[color_index]})
-        j++
+      if (j == 5) { // this adds the date string together, so that ["Sep", "1", "2019"] -> ["Sep 1 2019"]
+        sections = append(sections, Section {Text: string_sections[j] + " " + string_sections[j + 1] + " "  + string_sections[j + 2], Fg: "fff", Bg: colors[color_index]})
+        j += 2
       } else {
         sections = append(sections, Section {Text: string_sections[j], Fg: "fff", Bg: colors[color_index]})
       }
       color_index++
     }
+    // \uE0B0 is the powerline font seperator
     fmt.Println(GenerateSections("\uE0B0", sections, false))
   }
 }

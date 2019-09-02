@@ -84,7 +84,7 @@ func main() {
     Section {Text: " " + get_host(), Fg: "fff", Bg: "06a"},
     Section {Text: get_user(), Fg: "fff", Bg: "09d"},
     Section {Text: get_cwd(), Fg: "fff", Bg: "555"},
-    Section {Text: git_branch(), Fg: "fff", Bg: "2a2"},
+    Section {Text: git_branch(), Fg: "000", Bg: "ff0"},
   }
   right_sections := []Section {
     Section {Text: "time", Fg: "000", Bg: "ccc"}, // time
