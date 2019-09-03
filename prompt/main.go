@@ -8,6 +8,8 @@ import (
   "strings"
   "os/user"
   "os/exec"
+  "time"
+  "github.com/lestrrat/go-strftime"
 )
 
 func utf8_length(str string) int {
@@ -53,7 +55,6 @@ func get_cwd() string {
   }
   return cwd
 }
-
 func get_user() string {
   usr, err := user.Current()
   if err != nil {
@@ -61,7 +62,6 @@ func get_user() string {
   }
   return usr.Username
 }
-
 func get_host() string {
   name, err := os.Hostname()
   if err != nil {
@@ -69,7 +69,6 @@ func get_host() string {
   }
   return name
 }
-
 func git_branch() string {
   out_bytes, _ := exec.Command("git", "branch").Output()
   out := string(out_bytes)
@@ -77,6 +76,27 @@ func git_branch() string {
     return "no branch"
   }
   return strings.Split(out, "\n")[0]
+}
+func get_time() string {
+  result, err := strftime.Format("%I:%M:%S %p", time.Now())
+  if (err != nil) {
+    panic(err)
+  }
+  return result
+}
+func get_date_letters() string {
+  result, err := strftime.Format("%a, %b %d, %Y", time.Now())
+  if (err != nil) {
+    panic(err)
+  }
+  return result
+}
+func get_date_numbers() string {
+  result, err := strftime.Format("%Y-%m-%d", time.Now())
+  if (err != nil) {
+    panic(err)
+  }
+  return result
 }
 
 func main() {
@@ -87,9 +107,9 @@ func main() {
     Section {Text: git_branch(), Fg: "000", Bg: "ff0"},
   }
   right_sections := []Section {
-    Section {Text: "time", Fg: "000", Bg: "ccc"}, // time
-    Section {Text: "date with letters", Fg: "fff", Bg: "888"}, // date but letters
-    Section {Text: "date with numbers", Fg: "fff", Bg: "555"}, // date but numbers
+    Section {Text: get_time(), Fg: "000", Bg: "ccc"}, // time
+    Section {Text: get_date_letters(), Fg: "fff", Bg: "888"}, // date but letters
+    Section {Text: get_date_numbers(), Fg: "fff", Bg: "555"}, // date but numbers
   }
   if (len(os.Args) != 2) {
     panic("Must enter width as first arg")
