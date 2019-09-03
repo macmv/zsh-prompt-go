@@ -12,6 +12,12 @@ import (
   "github.com/lestrrat/go-strftime"
 )
 
+/*
+TODO:
+- make get_cwd have powerline spacers instead of /
+- fix bugs with tab completion
+*/
+
 func get_cwd() string {
   cwd, err := os.Getwd()
   if err != nil {
@@ -50,10 +56,10 @@ func get_git() string {
   } else {
     branch = strings.Split(out, "\n")[0][2:]
   }
-  out_bytes, _ = exec.Command("git", "status").Output()
+  out_bytes, _ = exec.Command("git", "diff").Output()
   out = string(out_bytes)
   var status string
-  if strings.Split(out, "\n")[1] == "nothing to commit, working tree clean" {
+  if out == "" {
     status = ""
   } else {
     status = "* "
