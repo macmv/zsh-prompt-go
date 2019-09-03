@@ -12,34 +12,6 @@ import (
   "github.com/lestrrat/go-strftime"
 )
 
-func utf8_length(str string) int {
-  length := 0
-  for i := 0; i < len(str); i++ {
-    let := str[i]
-    if let >> 6 == 2 {
-      continue
-    }
-    // skip until hit 'm'
-    if let == '\033' {
-      var j int
-      for j = 0; j < 1000; j++ {
-        let = str[i + j]
-        if j + i > len(str) {
-          j--
-          break
-        }
-        if let == 'm' {
-          break
-        }
-      }
-      i += j
-    } else {
-      length += 1
-    }
-  }
-  return length
-}
-
 func get_cwd() string {
   cwd, err := os.Getwd()
   if err != nil {
@@ -69,13 +41,24 @@ func get_host() string {
   }
   return name
 }
-func git_branch() string {
+func get_git() string {
   out_bytes, _ := exec.Command("git", "branch").Output()
   out := string(out_bytes)
-  if (len(out) == 0) {
-    return "no branch"
+  var branch string
+  if len(out) == 0 {
+    return ""
+  } else {
+    branch = strings.Split(out, "\n")[0][2:]
   }
-  return strings.Split(out, "\n")[0]
+  out_bytes, _ = exec.Command("git", "status").Output()
+  out = string(out_bytes)
+  var status string
+  if strings.Split(out, "\n")[1] == "nothing to commit, working tree clean" {
+    status = ""
+  } else {
+    status = "* "
+  }
+  return status + branch
 }
 func get_time() string {
   result, err := strftime.Format("%I:%M:%S %p", time.Now())
@@ -104,7 +87,7 @@ func main() {
     Section {Text: " " + get_host(), Fg: "fff", Bg: "06a"},
     Section {Text: get_user(), Fg: "fff", Bg: "09d"},
     Section {Text: get_cwd(), Fg: "fff", Bg: "555"},
-    Section {Text: git_branch(), Fg: "000", Bg: "ff0"},
+    Section {Text: get_git(), Fg: "000", Bg: "ff0"},
   }
   right_sections := []Section {
     Section {Text: get_time(), Fg: "000", Bg: "ccc"}, // time
@@ -122,10 +105,13 @@ func main() {
   right_string := GenerateSections("\uE0B2", right_sections, true)
   fmt.Print(Paint("┏━", "06a", "000"))
   fmt.Print(left_string)
-  left_length := 2 + utf8_length(left_string)
-  right_length := utf8_length(right_string)
-  fmt.Print(strings.Repeat(" ", width - left_length - right_length))
-  fmt.Print(right_string)
+  left_length := 2 + UTF8Length(left_string)
+  right_length := UTF8Length(right_string)
+  spacer_size := width - left_length - right_length
+  if (spacer_size > 0) {
+    fmt.Print(strings.Repeat(" ", spacer_size))
+    fmt.Print(right_string)
+  }
   fmt.Print("\n")
   fmt.Print(Paint("┗━ ", "06a", "000"))
 }
