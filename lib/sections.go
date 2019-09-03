@@ -12,11 +12,11 @@ type Section struct {
 }
 
 func getRGB(code string) string {
-  if (len(code) != 3) {
+  if len(code) != 3 {
     panic("String must be 3 chars!")
   }
   color, err := strconv.ParseInt(code, 16, 32)
-  if (err != nil) {
+  if err != nil {
     panic(err)
   }
   r := (color / 256) * 17
@@ -32,7 +32,7 @@ func paintWithSpacing(Text string, Fg string, Bg string, direction bool) string 
   str += ";48;2;"
   str += getRGB(Bg)
   str += "m"
-  if (direction) {
+  if direction {
     str += " "
     str += Text
   } else {
@@ -68,9 +68,14 @@ direction:
 func GenerateSections(separator string, sections []Section, direction bool) string {
   var str string
   for i := 0; i < len(sections); i++ {
+    if sections[i].Text == "" {
+      sections = append(sections[:i], sections[i + 1:]...) // doesn't check [i + 1].Text == ""
+    }
+  }
+  for i := 0; i < len(sections); i++ {
     var sec1, sec2 Section;
-    if (direction) {
-      if (i <= 0) {
+    if direction {
+      if i <= 0 {
         sec1.Text = separator
         sec1.Fg = sections[i].Bg
         sec1.Bg = "000"
@@ -82,7 +87,7 @@ func GenerateSections(separator string, sections []Section, direction bool) stri
       sec2 = sections[i]
     } else {
       sec1 = sections[i]
-      if (i >= len(sections) - 1) {
+      if i >= len(sections) - 1 {
         sec2.Text = separator
         sec2.Fg = sections[i].Bg
         sec2.Bg = "000"
