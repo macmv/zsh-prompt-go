@@ -25,25 +25,6 @@ func getRGB(code string) string {
   return fmt.Sprintf("%d;%d;%d", r, g, b)
 }
 
-func paintWithSpacing(Text string, Fg string, Bg string, direction bool) string {
-  var str string
-  str += "\033[38;2;"
-  str += getRGB(Fg)
-  str += ";48;2;"
-  str += getRGB(Bg)
-  str += "m"
-  if direction {
-    str += " "
-    str += Text
-  } else {
-    str += Text
-    str += " "
-  }
-  str += "\033[38;2;255;255;255;48;2;0;0;0m"
-  return str
-}
-
-
 func Paint(text string, fg string, bg string) string {
   var str string
   str += "\033[38;2;"
@@ -74,7 +55,7 @@ func GenerateSections(separator string, sections []Section, direction bool) stri
   }
   for i := 0; i < len(sections); i++ {
     var sec1, sec2 Section;
-    if direction {
+    if direction { // right side (left facing arrows)
       if i <= 0 {
         sec1.Text = separator
         sec1.Fg = sections[i].Bg
@@ -85,7 +66,11 @@ func GenerateSections(separator string, sections []Section, direction bool) stri
         sec1.Bg = sections[i - 1].Bg
       }
       sec2 = sections[i]
-    } else {
+      str += Paint(" ", sec1.Fg, sec1.Bg)
+      str += Paint(sec1.Text, sec1.Fg, sec1.Bg)
+      str += Paint(" ", sec2.Fg, sec2.Bg)
+      str += Paint(sec2.Text, sec2.Fg, sec2.Bg)
+    } else { // left side (right facing arrows)
       sec1 = sections[i]
       if i >= len(sections) - 1 {
         sec2.Text = separator
@@ -96,9 +81,11 @@ func GenerateSections(separator string, sections []Section, direction bool) stri
         sec2.Fg = sections[i].Bg
         sec2.Bg = sections[i + 1].Bg
       }
+      str += Paint(sec1.Text, sec1.Fg, sec1.Bg)
+      str += Paint(" \033[0m", sec1.Fg, sec1.Bg)
+      str += Paint(sec2.Text, sec2.Fg, sec2.Bg)
+      str += Paint(" \033[0m", sec2.Fg, sec2.Bg)
     }
-    str += paintWithSpacing(sec1.Text, sec1.Fg, sec1.Bg, direction)
-    str += paintWithSpacing(sec2.Text, sec2.Fg, sec2.Bg, direction)
   }
   return str
 }

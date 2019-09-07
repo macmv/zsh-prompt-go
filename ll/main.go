@@ -51,7 +51,7 @@ func main() {
     var sections []Section
     // color_index: index of the colors array defined above
     color_index := 0
-    for j := 0; j < 9; j++ {
+    for j := 0; j < 8; j++ {
       if (j == 5) { // this adds the date string together, so that ["Sep", "1", "2019"] -> ["Sep 1 2019"]
         sections = append(sections, Section {Text: string_sections[j] + " " + string_sections[j + 1] + " "  + string_sections[j + 2], Fg: "fff", Bg: colors[color_index]})
         j += 2
@@ -61,6 +61,7 @@ func main() {
       color_index++
     }
     // \uE0B0 is the powerline font seperator
-    fmt.Println(GenerateSections("\uE0B0", sections, false))
+    fmt.Print(GenerateSections("\uE0B0", sections, false))
+    fmt.Println(string_sections[len(string_sections) - 1])
   }
 }

@@ -18,7 +18,7 @@ TODO:
 - fix bugs with tab completion
 */
 
-func get_cwd() string {
+func get_cwd(separator string) string {
   cwd, err := os.Getwd()
   if err != nil {
     panic(err)
@@ -31,7 +31,9 @@ func get_cwd() string {
     cwd = cwd[len(usr.HomeDir):]
     cwd = "~" + cwd
   }
-  return cwd
+  out_arr := strings.Split(cwd, "/")
+  out_arr[len(out_arr) - 1] = "\033[1m" + out_arr[len(out_arr) - 1]
+  return strings.Join(out_arr, separator)
 }
 func get_user() string {
   usr, err := user.Current()
@@ -92,7 +94,7 @@ func main() {
   left_sections := []Section {
     Section {Text: " " + get_host(), Fg: "fff", Bg: "06a"},
     Section {Text: get_user(), Fg: "fff", Bg: "09d"},
-    Section {Text: get_cwd(), Fg: "fff", Bg: "555"},
+    Section {Text: get_cwd(" \uE0B1 "), Fg: "fff", Bg: "555"},
     Section {Text: get_git(), Fg: "000", Bg: "ff0"},
   }
   right_sections := []Section {
